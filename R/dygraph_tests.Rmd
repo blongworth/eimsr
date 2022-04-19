@@ -1,0 +1,39 @@
+---
+title: "Dygraph tests"
+author: "Brett Longworth"
+date: "4/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, fig.height=2}
+library(eimsr)
+library(xts)
+library(dygraphs)
+library(tidyverse)
+
+eims_dir <- "C:/Users/brett/Documents/AR61b/EIMS/Data/QMSdata/AR61"
+file <- "20211109ar61bf1.csv"
+
+
+eims <- read_eims(file)
+m32 <- eims[[4]]
+m40 <- eims[[5]]
+ts <- eims[['timestamp']]
+mass32 <- as.xts(m32, ts)
+mass40 <- as.xts(m40, ts)
+
+dygraph(mass32, group = "massplot")
+dygraph(mass40, group = "massplot") %>%
+  dyRangeSelector()
+```
+
+```{r, fig.height = 1}
+eims_ts <- map(eims[c(3:7)], as.xts, eims[['timestamp']])
+
+walk(eims_ts, dygraph, group = "mapmass")
+```
+
