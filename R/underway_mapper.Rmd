@@ -1,0 +1,204 @@
+---
+title: "Underway Mapper"
+author: "Brett Longworth"
+date: "4/23/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# libraries
+library(tidyverse)
+library(rnaturalearth)
+library(gganimate)
+library(eimsr)
+library(here)
+
+theme_set(theme_classic())
+
+# TODO: Make this local to avoid needing network
+# lter_stations <- read_csv("https://nes-lter-data.whoi.edu/api/stations/en649.csv")
+lter_stations <- read_csv("data/lter_stations.csv")
+
+# Read data
+df <- read_csv(here("data/AR66b_eims_underway.csv"))
+```
+
+# Make da plots
+
+```{r}
+plot_ts(df, "SBE48T")
+```
+
+```{r}
+plot_ts(df, "FLR")
+```
+
+```{r}
+plot_ts(df, "SBE45S")
+```
+
+```{r}
+plot_ts(df, "FLR")
+```
+
+```{r}
+df %>% 
+  filter()
+ggplot(df, aes(timestamp, FLR)) + geom_line()
+plotly::ggplotly()
+```
+
+```{r}
+plot_ts(df, "air_saturation")
+```
+
+
+```{r}
+
+# get basemap data
+bg = ne_countries(scale = "medium", continent = 'north america', returnclass = "sf")
+
+
+ggplot()+
+  # basemap
+  geom_sf(data = bg)+
+  coord_sf(xlim = range(df$Dec_LON, na.rm = TRUE), 
+           ylim = range(df$Dec_LAT, na.rm = TRUE), 
+           expand = FALSE)+
+  # LTER stations
+  geom_point(data = lter_stations, 
+             aes(x=longitude,y=latitude),
+             alpha = 1, shape=21, size = 2)+
+  geom_text(data = lter_stations,
+            aes(x=longitude,y=latitude, label = name),
+            hjust = 0, nudge_x = 0.05,
+            vjust = 0, nudge_y = 0.05,
+            size = 1.5) +
+  # lines and points
+  geom_path(data = df, 
+            aes(x=Dec_LON,y=Dec_LAT,color=SBE48T),
+            size = 1,
+            alpha = 1)+
+  
+  # formatting
+  scale_fill_viridis_c(option = "inferno")+
+  scale_color_viridis_c(option = "inferno")+
+  scale_size_continuous(range = c(0.1,10))+
+  labs(x=NULL, y=NULL, 
+       fill = 'Temp C', 
+       color = 'Temp C')+
+  theme_dark()+
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+df_s <- df %>% 
+  filter(Dec_LAT < 40.5,
+         timestamp > as.POSIXct('2022-04-24 12:30:00'),
+         timestamp < as.POSIXct('2022-04-24 14:45:00')) 
+
+ggplot()+
+  # basemap
+  geom_sf(data = bg)+
+  coord_sf(xlim = range(df_s$Dec_LON, na.rm = TRUE), 
+           ylim = range(df_s$Dec_LAT, na.rm = TRUE), 
+           expand = TRUE)+
+  # LTER stations
+  geom_point(data = lter_stations, 
+             aes(x=longitude,y=latitude),
+             alpha = 1, shape=21, size = 2)+
+  geom_text(data = lter_stations,
+            aes(x=longitude,y=latitude, label = name),
+            hjust = 0, nudge_x = 0.05,
+            vjust = 0, nudge_y = 0.05,
+            size = 2) +
+  # lines and points
+  geom_path(data = df_s, 
+            aes(x=Dec_LON,y=Dec_LAT,color=air_saturation),
+            size = 2,
+            alpha = .5)+
+  
+  # formatting
+  scale_fill_viridis_c(option = "inferno")+
+  scale_color_viridis_c(option = "inferno")+
+  scale_size_continuous(range = c(0.1,10))+
+  labs(x=NULL, y=NULL, 
+       fill = 'o2 sat', 
+       color = 'O2 sat')+
+  #theme_dark()+
+  theme(panel.grid = element_blank())
+```
+```{r}
+ggplot()+
+  # basemap
+  geom_sf(data = bg)+
+  coord_sf(xlim = range(df_s$Dec_LON, na.rm = TRUE), 
+           ylim = range(df_s$Dec_LAT, na.rm = TRUE), 
+           expand = TRUE)+
+  # LTER stations
+  geom_point(data = lter_stations, 
+             aes(x=longitude,y=latitude),
+             alpha = 1, shape=21, size = 2)+
+  geom_text(data = lter_stations,
+            aes(x=longitude,y=latitude, label = name),
+            hjust = 0, nudge_x = 0.05,
+            vjust = 0, nudge_y = 0.05,
+            size = 2) +
+  # lines and points
+  geom_path(data = df_s, 
+            aes(x=Dec_LON,y=Dec_LAT,color=air_saturation),
+            size = 2,
+            alpha = .5)+
+  
+  # formatting
+  scale_fill_viridis_c(option = "inferno")+
+  scale_color_viridis_c(option = "inferno")+
+  scale_size_continuous(range = c(0.1,10))+
+  labs(x=NULL, y=NULL, 
+       fill = 'O2 Sat', 
+       color = 'O2 Sat')+
+  #theme_dark()+
+  theme(panel.grid = element_blank())
+```
+
+# O2/Ar across front
+
+```{r}
+df_s <- df %>% 
+  filter(Dec_LAT < 40.4)
+lter_s <- lter_stations %>% 
+  filter(str_starts(name, "L"),
+         !str_ends(name, "12|13"),
+         latitude < 40.4)
+ggplot(df_s) +
+  geom_vline(data = lter_s, 
+             aes(xintercept=latitude),
+             color = "gray") + 
+  geom_text(data = lter_s,
+            aes(x=latitude, y = min(df_s$SBE48T) - 1, label = name),
+            hjust = 0, nudge_x = 0.01,
+            size = 3) +
+  geom_point(aes(Dec_LAT, SBE48T, 
+                 color = factor(as.Date(timestamp))),
+             size = 1.5) +
+  geom_path(aes(Dec_LAT, SBE48T, 
+                color = factor(as.Date(timestamp))),
+            size = 1.5) +
+  scale_x_reverse() +
+  scale_color_viridis_d(name = "Date") +
+  labs(title = "AR66b underway temp vs latitude",
+       subtitle = "By date",
+       x = "Latitude (deg N)",
+       y = "Temperature (C)") +
+  theme(legend.position = c(0.20, 0.70),
+        legend.background = element_rect(fill = "white", color = "black"))
+
+
+ggsave("daily_temp_lat.svg", width=10, height=6)
+ggplotly()
+```
+
