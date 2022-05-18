@@ -6,10 +6,6 @@ library(eimsr)
 library(data.table)
 library(here)
 
-# TODO: Make this local to avoid needing network
-# lter_stations <- read_csv("https://nes-lter-data.whoi.edu/api/stations/en649.csv")
-lter_stations <- read_csv("data/lter_stations.csv")
-
 # Get Underway data
 underway_dir <- "//10.100.100.30/data_on_memory/underway/proc"
 underway_files <- list.files(underway_dir, "AR\\d{6}_.+\\.csv",

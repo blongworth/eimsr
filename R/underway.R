@@ -3,9 +3,9 @@ NULL
 
 #' Read and parse underway files
 #'
-#' @param ship_file
+#' @param ship_file Path to an Armstrong format processed underway file.
 #'
-#' @return
+#' @return A dataframe of ship data
 #' @export
 #'
 read_underway <- function(ship_file) {

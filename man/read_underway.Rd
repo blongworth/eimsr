@@ -7,10 +7,10 @@
 read_underway(ship_file)
 }
 \arguments{
-\item{ship_file}{}
+\item{ship_file}{Path to an Armstrong format processed underway file.}
 }
 \value{
-
+A dataframe of ship data
 }
 \description{
 Read and parse underway files
