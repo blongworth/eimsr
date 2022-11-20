@@ -1,8 +1,10 @@
 ---
-title: "Underway Mapper"
+title: "AR70B underway maps"
 author: "Brett Longworth"
-date: "4/23/2022"
-output: html_document
+date: "2022-11-20"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +23,7 @@ library(plotly)
 theme_set(theme_classic())
 
 # Read data
-df <- read_csv(here("data/AR66b_eims_underway.csv"))
+df <- read_csv(here("data/AR70b_eims_underway.csv"))
 ```
 
 # Make da plots
@@ -69,7 +71,7 @@ ggplot()+
             aes(x=longitude,y=latitude, label = name),
             hjust = 0, nudge_x = 0.05,
             vjust = 0, nudge_y = 0.05,
-            size = 1.5) +
+            size = 3) +
   # lines and points
   geom_path(data = df, 
             aes(x=Dec_LON,y=Dec_LAT,color=SBE48T),
@@ -91,7 +93,7 @@ ggplot()+
 df_s <- df %>% 
   filter(Dec_LAT < 40.5,
          timestamp > as.POSIXct('2022-04-24 12:30:00'),
-         timestamp < as.POSIXct('2022-04-24 14:45:00')) 
+         timestamp < as.POSIXct('2022-11-24 14:45:00')) 
 
 ggplot()+
   # basemap
@@ -182,7 +184,7 @@ ggplot(df_s) +
             size = 1.5) +
   scale_x_reverse() +
   scale_color_viridis_d(name = "Date") +
-  labs(title = "AR66b underway temp vs latitude",
+  labs(title = "AR70b underway temp vs latitude",
        subtitle = "By date",
        x = "Latitude (deg N)",
        y = "Temperature (C)") +

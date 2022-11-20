@@ -49,7 +49,8 @@ read_underway <- function(ship_file) {
                      SSVdslog = col_double(),
                      Depth12 = col_double(),
                      Depth35 = col_double(),
-                     EM122 = col_double()
+                     EM122 = col_double(),
+                     EM710 = col_double()
                    )) %>%
   mutate(timestamp = as.POSIXct(paste(DATE_GMT, TIME_GMT),
                             format="%Y/%m/%d %H:%M:%S", tz = "GMT"))
