@@ -24,7 +24,10 @@ read_eims <- function(filename) {
     dplyr::mutate(timestamp = eims_start + elapsed_time)
 }
 
-#' Timeseries plot of eims mass
+#' Timeseries plot
+#'
+#' Converts the given parameter to a timeseries
+#' and plots with `dygraphs`
 #'
 #' @param data A dataframe
 #' @param field Character string of name of column.
@@ -33,9 +36,10 @@ read_eims <- function(filename) {
 #' @return Timeseries plot
 #' @export
 #'
-plot_ts <- function(data, field, timestamp = "timestamp") {
-  field_ts <- xts::as.xts(data[[field]], data[["timestamp"]])
-  dygraphs::dygraph(field_ts, group = "massplot") %>%
+plot_ts <- function(data, field, timestamp = "timestamp", title = field, GMT = TRUE) {
+  field_ts <- xts::as.xts(data[[field]], data[[timestamp]])
+  dygraphs::dygraph(field_ts, group = "massplot", main = title) |>
+    dygraphs::dyOptions(useDataTimezone = GMT) |>
     dygraphs::dyRangeSelector()
 }
 

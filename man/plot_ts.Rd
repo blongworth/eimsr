@@ -2,9 +2,9 @@
 % Please edit documentation in R/eims.R
 \name{plot_ts}
 \alias{plot_ts}
-\title{Timeseries plot of eims mass}
+\title{Timeseries plot}
 \usage{
-plot_ts(data, field, timestamp = "timestamp")
+plot_ts(data, field, timestamp = "timestamp", title = field, GMT = TRUE)
 }
 \arguments{
 \item{data}{A dataframe}
@@ -17,5 +17,6 @@ plot_ts(data, field, timestamp = "timestamp")
 Timeseries plot
 }
 \description{
-Timeseries plot of eims mass
+Converts the given parameter to a timeseries
+and plots with `dygraphs`
 }
