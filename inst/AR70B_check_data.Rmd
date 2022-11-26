@@ -1,0 +1,117 @@
+---
+title: "AR70B underway maps"
+author: "Brett Longworth"
+date: "2022-11-20"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# libraries
+library(tidyverse)
+library(eimsr)
+library(here)
+library(dygraphs)
+
+theme_set(theme_classic())
+```
+
+
+```{r}
+# Read data
+df_combined <- read_csv(here("data/AR70b_eims_underway.csv"))
+
+# Get EIMS data
+eims_dir <- "C:/Users/brett/Documents/AR70b"
+eims_files <- list.files(eims_dir, "202211\\d{2}ar70b.+\\.csv",
+                             full.names = TRUE)
+eims <- map_dfr(eims_files, read_eims) |>
+  mutate(mass_4032 = mass_40/mass_32) # Add ratio
+  
+# Get Underway data
+underway_dir <- file.path(eims_dir, "underway_data") 
+underway_files <- list.files(underway_dir, "AR\\d{6}_.+\\.csv",
+                             full.names = TRUE)
+underway <- map_dfr(underway_files, read_underway)
+
+filter(underway, is.na(timestamp))
+
+underway <- underway |> 
+  filter(!is.na(timestamp),
+         timestamp > "2022-11-17 14:49:26",
+         timestamp < "2022-11-22 11:20:00")
+
+
+
+# Get EIMS temp data
+temps_dir <- eims_dir
+temps_files <- list.files(temps_dir, "EIMSTemp\\d{5}\\.\\d{4}",
+                             full.names = TRUE)
+temps <- map_dfr(temps_files, read_temps)
+
+# Get optode data
+optode_dir <- eims_dir
+optode_files <- list.files(optode_dir, "202211\\d{2}T\\d{6}\\.txt",
+                             full.names = TRUE)
+optode <- map_dfr(optode_files, read_optode)
+```
+
+# Make da plots
+
+## EIMS
+
+40/32 over time. Check that data are continuous and no major noise or ratio issues. 
+
+```{r}
+plot_ts(eims, "mass_4032") |> 
+  dyAxis("y", "Current Ratio") |> 
+  dySeries("V1", "40/32")
+```
+
+## Optode
+
+Air saturation over time. Ugh. 
+
+```{r}
+plot_ts(optode, "air_saturation")
+```
+
+## temp server
+
+### Thermistor
+
+```{r}
+plot_ts(temps, "thermistor") 
+  
+```
+```{r}
+plot_ts(temps, "water_flow")
+```
+```{r}
+plot_ts(temps, "pressure")
+```
+
+## Underway
+
+```{r}
+plot_ts(underway, "FLOW")
+
+#ggplot(underway, aes(timestamp, FLOW)) + geom_line()
+```
+
+```{r}
+plot_ts(underway, "SBE48T")
+```
+
+```{r}
+plot_ts(underway, "SBE45S")
+```
+
+```{r}
+plot_ts(underway, "FLR")
+```
