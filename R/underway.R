@@ -56,6 +56,17 @@ read_underway <- function(ship_file) {
                             format="%Y/%m/%d %H:%M:%S", tz = "GMT"))
 }
 
+#' Read and parse Endeavor underway files
+#'
+#' @param ship_file Path to an Endeavor format processed underway file.
+#'
+#' @return A dataframe of ship data
+#' @export
+#'
+read_en_underway <- function(ship_file) {
+  read_csv(ship_file, comment = "#")
+}
+
 combine_underway <- function(underway_files) {
   map_dfr(ship_underway, read_underway)
 }

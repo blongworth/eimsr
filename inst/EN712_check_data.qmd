@@ -1,0 +1,106 @@
+---
+title: "EN712 underway data"
+author: "Brett Longworth"
+date: "2024-02-12"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+# libraries
+library(tidyverse)
+library(eimsr)
+library(here)
+library(dygraphs)
+
+theme_set(theme_classic())
+data_dir <- "/Users/brett/Projects/EN712/data"
+```
+
+
+```{r}
+# Read data
+#df_combined <- read_csv(here("data/AR70b_eims_underway.csv"))
+
+# Get EIMS data
+eims_files <- list.files(data_dir, "202402\\d{2}en712.+\\.csv",
+                             full.names = TRUE)
+eims <- map_dfr(eims_files, read_eims) |> 
+  mutate(mass_3240 = mass_32 / mass_40)
+
+# Get Underway data
+underway_files <- list.files(data_dir, "Data1Sec_Cruise_20240208.+\\.csv",
+                             full.names = TRUE)
+underway <- read_en_underway(underway_files)
+
+# Get EIMS temp data
+temps_files <- list.files(data_dir, "EIMSTemp\\d{5}\\.\\d{4}",
+                             full.names = TRUE)
+temps <- map_dfr(temps_files, read_temps)
+
+# Get optode data
+optode_files <- list.files(data_dir, "202402\\d{2}T\\d{6}\\.txt",
+                             full.names = TRUE)
+optode <- map_dfr(optode_files, read_optode)
+```
+
+# Make da plots
+
+## EIMS
+
+32/40 over time. Check that data are continuous and no major noise or ratio issues. 
+
+```{r}
+plot_ts(eims, "mass_3240") |> 
+  dyAxis("y", "Current Ratio") |> 
+  dySeries("V1", "32/40")
+```
+
+## Optode
+
+Air saturation over time. Ugh. 
+
+```{r}
+plot_ts(optode, "air_saturation")
+```
+
+## temp server
+
+### Thermistor
+
+```{r}
+plot_ts(temps, "thermistor") 
+  
+```
+```{r}
+plot_ts(temps, "water_flow")
+```
+
+```{r}
+plot_ts(temps, "pressure")
+```
+
+## Underway
+
+```{r}
+#| eval: false
+plot_ts(underway, "FLOW")
+
+#ggplot(underway, aes(timestamp, FLOW)) + geom_line()
+```
+
+```{r}
+#| eval: false
+plot_ts(underway, "SBE48T")
+```
+
+```{r}
+#| eval: false
+plot_ts(underway, "SBE45S")
+```
+
+```{r}
+#| eval: false
+plot_ts(underway, "FLR")
+```
