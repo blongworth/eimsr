@@ -1,0 +1,133 @@
+---
+title: "AR99 underway maps"
+author: "Brett Longworth"
+date: "2026-01-17"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# libraries
+library(tidyverse)
+library(eimsr)
+library(here)
+library(dygraphs)
+library(plotly)
+
+theme_set(theme_classic())
+```
+
+
+```{r}
+source(here("inst/get_AR99_data.R"))
+
+cruise_start <- as.POSIXct("2026-01-13 17:30:00", tz = "UTC")
+
+eims <- eims |> 
+  filter(timestamp > cruise_start) |> 
+  mutate(mass_4032 = mass_40 / mass_32)
+
+optode <- filter(optode, timestamp > cruise_start)
+temps <- filter(temps, timestamp > cruise_start)
+underway <- filter(underway, timestamp > cruise_start)
+```
+
+# Make da plots
+
+## EIMS
+
+40/32 over time. Check that data are continuous and no major noise or ratio issues. 
+
+```{r}
+
+# --- find contiguous air_cal intervals for shading ---
+air_intervals <- eims %>%
+  arrange(timestamp) %>%
+  mutate(
+    grp = cumsum(air_cal & !dplyr::lag(air_cal, default = FALSE))
+  ) %>%
+  filter(air_cal) %>%
+  group_by(grp) %>%
+  summarise(
+    start = min(timestamp),
+    end   = max(timestamp),
+    .groups = "drop"
+  )
+
+# --- build plotly with shaded bands ---
+p <- plot_ly(
+  data = eims,
+  x = ~timestamp,
+  y = ~mass_4032,
+  type = "scatter",
+  mode = "lines",
+  name = "40/32"
+) |>
+  layout(
+    yaxis = list(title = "Current Ratio"),
+    shapes = lapply(seq_len(nrow(air_intervals)), function(i) {
+      list(
+        type = "rect",
+        xref = "x",
+        yref = "paper",
+        x0   = air_intervals$start[i],
+        x1   = air_intervals$end[i],
+        y0   = 0,
+        y1   = 1,
+        fillcolor = "rgba(0, 150, 255, 0.2)",  # light blue
+        line = list(width = 0)
+      )
+    })
+  )
+
+p
+
+```
+
+## Optode
+
+Air saturation over time. Ugh. 
+
+```{r}
+plot_ts(optode, "air_saturation")
+```
+
+## temp server
+
+### Thermistor
+
+```{r}
+plot_ts(temps, "thermistor") 
+  
+```
+```{r}
+plot_ts(temps, "water_flow")
+```
+```{r}
+plot_ts(temps, "pressure")
+```
+
+## Underway
+
+```{r}
+plot_ts(underway, "FLOW")
+
+#ggplot(underway, aes(timestamp, FLOW)) + geom_line()
+```
+
+```{r}
+plot_ts(underway, "SBE48T")
+```
+
+```{r}
+plot_ts(underway, "SBE45S")
+```
+
+```{r}
+plot_ts(underway, "FLR")
+```

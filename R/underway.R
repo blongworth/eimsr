@@ -17,7 +17,7 @@ read_underway <- function(ship_file) {
                      Dec_LON = col_double(),
                      SPD = col_double(),
                      HDT = col_double(),
-                     COG = col_double(),
+                     CNAV_COG = col_double(),
                      SOG = col_double(),
                      WXTP_Ta = col_double(),
                      WXTS_Ta = col_double(),
@@ -49,8 +49,8 @@ read_underway <- function(ship_file) {
                      SSVdslog = col_double(),
                      Depth12 = col_double(),
                      Depth35 = col_double(),
-                     EM122 = col_double(),
-                     EM710 = col_double()
+                     EM124 = col_double(),
+                     EM712 = col_double()
                    )) %>%
   mutate(timestamp = as.POSIXct(paste(DATE_GMT, TIME_GMT),
                             format="%Y/%m/%d %H:%M:%S", tz = "GMT"))
