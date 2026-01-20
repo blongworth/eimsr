@@ -13,6 +13,7 @@ library(tidyverse)
 library(eimsr)
 library(here)
 library(dygraphs)
+library(plotly)
 
 theme_set(theme_classic())
 data_dir <- "/Users/brett/Projects/EN712/data"
@@ -29,6 +30,8 @@ eims_files <- list.files(data_dir, "202402\\d{2}en712.+\\.csv",
 eims <- map_dfr(eims_files, read_eims) |> 
   mutate(mass_3240 = mass_32 / mass_40)
 
+air_cal <- read_air_calibrations(file.path(data_dir, "MasterAirEN712.txt"))
+eims <- add_air_cal_flag(eims, air_cal, time_col = timestamp)
 # Get Underway data
 underway_files <- list.files(data_dir, "Data1Sec_Cruise_20240208.+\\.csv",
                              full.names = TRUE)
@@ -45,16 +48,14 @@ optode_files <- list.files(data_dir, "202402\\d{2}T\\d{6}\\.txt",
 optode <- map_dfr(optode_files, read_optode)
 ```
 
-# Make da plots
+# Make Plots
 
 ## EIMS
 
 32/40 over time. Check that data are continuous and no major noise or ratio issues. 
 
 ```{r}
-plot_ts(eims, "mass_3240") |> 
-  dyAxis("y", "Current Ratio") |> 
-  dySeries("V1", "32/40")
+plot_eims_air_bands(eims, "mass_3240", yaxis_title = "Mass 32/40")
 ```
 
 ## Optode
