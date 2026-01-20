@@ -2,6 +2,7 @@
 
 export(add_air_cal_flag)
 export(lat_prop_plot)
+export(plot_eims_air_bands)
 export(plot_eims_ratio)
 export(plot_ts)
 export(read_air_calibrations)

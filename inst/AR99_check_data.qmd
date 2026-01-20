@@ -30,63 +30,21 @@ cruise_start <- as.POSIXct("2026-01-13 17:30:00", tz = "UTC")
 
 eims <- eims |> 
   filter(timestamp > cruise_start) |> 
-  mutate(mass_4032 = mass_40 / mass_32)
+  mutate(mass_3240 = mass_32 / mass_40)
 
 optode <- filter(optode, timestamp > cruise_start)
 temps <- filter(temps, timestamp > cruise_start)
 underway <- filter(underway, timestamp > cruise_start)
 ```
 
-# Make da plots
+# Plots!
 
 ## EIMS
 
 40/32 over time. Check that data are continuous and no major noise or ratio issues. 
 
 ```{r}
-
-# --- find contiguous air_cal intervals for shading ---
-air_intervals <- eims %>%
-  arrange(timestamp) %>%
-  mutate(
-    grp = cumsum(air_cal & !dplyr::lag(air_cal, default = FALSE))
-  ) %>%
-  filter(air_cal) %>%
-  group_by(grp) %>%
-  summarise(
-    start = min(timestamp),
-    end   = max(timestamp),
-    .groups = "drop"
-  )
-
-# --- build plotly with shaded bands ---
-p <- plot_ly(
-  data = eims,
-  x = ~timestamp,
-  y = ~mass_4032,
-  type = "scatter",
-  mode = "lines",
-  name = "40/32"
-) |>
-  layout(
-    yaxis = list(title = "Current Ratio"),
-    shapes = lapply(seq_len(nrow(air_intervals)), function(i) {
-      list(
-        type = "rect",
-        xref = "x",
-        yref = "paper",
-        x0   = air_intervals$start[i],
-        x1   = air_intervals$end[i],
-        y0   = 0,
-        y1   = 1,
-        fillcolor = "rgba(0, 150, 255, 0.2)",  # light blue
-        line = list(width = 0)
-      )
-    })
-  )
-
-p
-
+plot_eims_air_bands(eims, "mass_3240", yaxis_title = "Mass 32/40")
 ```
 
 ## Optode
@@ -96,6 +54,12 @@ Air saturation over time. Ugh.
 ```{r}
 plot_ts(optode, "air_saturation")
 ```
+
+```{r}
+ggplot(optode, aes(timestamp, air_saturation)) +
+  geom_line(size = 0.3)
+```
+
 
 ## temp server
 
@@ -116,8 +80,13 @@ plot_ts(temps, "pressure")
 
 ```{r}
 plot_ts(underway, "FLOW")
+```
 
-#ggplot(underway, aes(timestamp, FLOW)) + geom_line()
+
+```{r}
+ggplot(underway, aes(timestamp, FLOW)) +
+  geom_line(size = .2) +
+  ggtitle("Underway Seawater Flow")
 ```
 
 ```{r}

@@ -9,7 +9,10 @@ library(here)
 data_dir = "/Users/brett/Documents/AR99"
 
 # Get Underway data
-underway_dir <- "/Volumes/data_on_memory/underway/proc"
+# Shipboard
+# underway_dir <- "/Volumes/data_on_memory/underway/proc"
+# post cruise
+underway_dir <- "/Users/brett/Documents/AR99/underway/proc"
 underway_files <- list.files(underway_dir, "AR\\d{6}_.+\\.csv",
                              full.names = TRUE)
 underway <- map_dfr(underway_files, read_underway)
