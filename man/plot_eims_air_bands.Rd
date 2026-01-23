@@ -9,7 +9,8 @@ plot_eims_air_bands(
   y_col,
   mean_color = "red",
   trim_seconds = 60,
-  yaxis_title = NULL
+  yaxis_title = NULL,
+  ggplot = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ plot_eims_air_bands(
 \item{trim_seconds}{Seconds to trim from start and end of each band (default 60)}
 
 \item{yaxis_title}{Y-axis title (default taken from y_col)}
+
+\item{ggplot}{Logical: if TRUE, return a ggplot object instead of plotly}
 }
 \value{
 A plotly object

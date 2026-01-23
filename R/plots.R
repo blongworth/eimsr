@@ -57,6 +57,7 @@ lat_prop_plot <- function(df, property, lat_range = NULL) {
 #' @param mean_color Color for mean lines
 #' @param trim_seconds Seconds to trim from start and end of each band (default 60)
 #' @param yaxis_title Y-axis title (default taken from y_col)
+#' @param ggplot Logical: if TRUE, return a ggplot object instead of plotly
 #'
 #' @return A plotly object
 #'
@@ -66,7 +67,8 @@ plot_eims_air_bands <- function(
   y_col,
   mean_color   = "red",
   trim_seconds = 60,
-  yaxis_title  = NULL
+  yaxis_title  = NULL,
+  ggplot       = FALSE
 ) {
   # y_col must be a character string
   if (!is.character(y_col) || length(y_col) != 1L) {
@@ -137,6 +139,43 @@ plot_eims_air_bands <- function(
     ) %>%
     ungroup()
 
+  if (ggplot) {
+  # --- ggplot version of the plot ---
+  # prepare shaded-rect data with explicit ymin/ymax
+  air_intervals_rect <- air_intervals |>
+    mutate(ymin = -Inf, ymax = Inf)
+
+  p_gg <- ggplot(eims, aes(x = timestamp, y = .data[[y_col]])) +
+    # shaded full bands
+    geom_rect(
+      data = air_intervals_rect,
+      aes(xmin = start, xmax = end, ymin = ymin, ymax = ymax),
+      inherit.aes = FALSE,
+      fill = "lightblue",
+      alpha = 0.6
+    ) +
+    # base line and points
+    geom_line(size = 0.4) +
+    # trimmed-band means as horizontal segments
+    {
+      if (nrow(air_means) > 0) {
+        geom_segment(
+          data = air_means,
+          aes(x = start_trim, xend = end_trim, y = band_mean, yend = band_mean),
+          inherit.aes = FALSE,
+          color = mean_color,
+          size = 1
+        )
+      } else {
+        NULL
+      }
+    } +
+    labs(y = yaxis_title, x = "Timestamp")
+
+  return(p_gg)
+  }
+
+  # Otherwise, plotly
   # --- base plot ---
   p <- plot_ly(
     data = eims,
