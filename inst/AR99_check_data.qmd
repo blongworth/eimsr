@@ -105,9 +105,7 @@ Oxygen saturation
 ```{r}
 ggplot(optode, aes(timestamp, air_saturation)) +
   geom_line(size = 0.4) +
-  labs(title = "EIMS Optode Air Saturation",
-       x = NULL,
-       y = "Air Saturation (%)")
+  labs(title = "EIMS Optode Air Saturation", x = NULL, y = "Air Saturation (%)")
 ```
 
 Annotated EIMS 32/40 during DMS system tests on January 14, 2026.
@@ -115,26 +113,34 @@ Annotated EIMS 32/40 during DMS system tests on January 14, 2026.
 ```{r}
 
 events <- tibble(
-  timestamp  = as.POSIXct(c("2026-01-14 15:28:00",
-                            "2026-01-14 15:41:00",
-                            "2026-01-14 18:42:00",
-                            "2026-01-14 19:26:00",
-                            "2026-01-14 20:23:00"),
-                          tz = "UTC"),
-  label = c("DMS ozone off",
-            "DMS compressor off",
-            "DMS compressor on",
-            "DMS w/air compressor",
-            "DMS on, outlets taped and in hood")
+  timestamp = as.POSIXct(
+    c(
+      "2026-01-14 15:28:00",
+      "2026-01-14 15:41:00",
+      "2026-01-14 18:42:00",
+      "2026-01-14 19:26:00",
+      "2026-01-14 20:23:00"
+    ),
+    tz = "UTC"
+  ),
+  label = c(
+    "DMS ozone off",
+    "DMS compressor off",
+    "DMS compressor on",
+    "DMS w/air compressor",
+    "DMS on, outlets taped and in hood"
+  )
 )
 
-eims |> 
-  filter(timestamp > as.POSIXct("2026-01-14 12:00:00", tz = "UTC"),
-         timestamp < as.POSIXct("2026-01-15 00:00:00", tz = "UTC")) |>
+eims |>
+  filter(
+    timestamp > as.POSIXct("2026-01-14 12:00:00", tz = "UTC"),
+    timestamp < as.POSIXct("2026-01-15 00:00:00", tz = "UTC")
+  ) |>
   plot_eims_air_bands("mass_3240", yaxis_title = "Mass 32/40", ggplot = TRUE) +
   geom_vline(
     data = events,
-    aes(xintercept = timestamp),  # for Date/POSIXct use numeric
+    aes(xintercept = timestamp), # for Date/POSIXct use numeric
     linetype = "dashed",
     color = "blue",
     alpha = 0.7
@@ -143,9 +149,9 @@ eims |>
   geom_text(
     data = events,
     aes(x = timestamp, y = Inf, label = label),
-    angle = 90,           # rotate text vertically
-    vjust = -0.2,         # nudge a bit inside from the axis
-    hjust = 1.1, 
+    angle = 90, # rotate text vertically
+    vjust = -0.2, # nudge a bit inside from the axis
+    hjust = 1.1,
     color = "blue",
     size = 3
   ) +
